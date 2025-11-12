@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AR Weihnachtskarte</title>
+
+  <!-- A-Frame & AR.js -->
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+
+  <style>
+    body { margin: 0; overflow: hidden; background-color: black; }
+
+    /* Klickbarer Marker-Link */
+    #marker-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.5);
+      color: #FFD700;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-family: sans-serif;
+      text-decoration: underline;
+      z-index: 9999;
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Link zur Marker-Datei -->
+  <a id="marker-link" href="pattern-SchneeflockeSchwarz.patt" target="_blank">
+    Marker herunterladen
+  </a>
+
+  <a-scene embedded arjs="trackingMethod: best;">
+    <!-- Marker -->
+    <a-marker type="pattern" url="pattern-SchneeflockeSchwarz.patt">
+
+      <!-- Weihnachtsbaum -->
+      <a-image 
+        src="bild/11594128-weihnachtsbaum-illustration-schwarz-weiss-einfarbiger-weihnachtsbaum-dekorativ-stilisierte-illustration-vektor.jpg"
+        rotation="-90 0 0"
+        width="2" height="2"
+        position="0 0 0"
+        animation="property: position; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true; to: 0 0.2 0">
+      </a-image>
+
+      <!-- Container für Schneeflocken -->
+      <a-entity id="snow-container"></a-entity>
+
+      <!-- Container für Sterne -->
+      <a-entity id="star-container"></a-entity>
+
+    </a-marker>
+
+    <!-- Kamera -->
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <script>
+    // Zufallsfunktion
+    function random(min,max){ return Math.random()*(max-min)+min; }
+
+    // ===== SCHNEEFLOCKEN =====
+    const snowContainer = document.querySelector('#snow-container');
+    for(let i=0;i<40;i++){
+      const flake = document.createElement('a-sphere');
+      const side = i%2===0?1:-1;
+      const x=random(0.1,1.2)*side;
+      const y=random(0.5,2.0);
+      const z=random(-0.5,0.5);
+
+      flake.setAttribute('radius', random(0.02,0.05));
+      flake.setAttribute('color','#FFFFFF');
+      flake.setAttribute('material','opacity:0.9; transparent:true; shader:flat;');
+      flake.setAttribute('position', `${x} ${y} ${z}`);
+
+      // Fallen
+      flake.setAttribute('animation__fall', {
+        property:'position',
+        dur: random(6000,9000),
+        loop:true,
+        easing:'linear',
+        from: `${x} 2.2 ${z}`,
+        to: `${x} -0.2 ${z}`
+      });
+
+      // Schwenken
+      flake.setAttribute('animation__sway', {
+        property:'position',
+        dir:'alternate',
+        dur: random(1000,3000),
+        loop:true,
+        easing:'easeInOutSine',
+        to: `${x+random(-0.2,0.2)} ${y} ${z+random(-0.2,0.2)}`
+      });
+
+      snowContainer.appendChild(flake);
+    }
+
+    // ===== STERNE =====
+    const starContainer = document.querySelector('#star-container');
+    const starCount = 10;
+    const radius = 1.2;
+
+    for(let i=0;i<starCount;i++){
+      const star = document.createElement('a-sphere');
+      const angle = (i/starCount)*Math.PI*2;
+      const x = Math.cos(angle)*radius;
+      const y = 1+Math.random()*0.5;
+      const z = Math.sin(angle)*radius;
+
+      star.setAttribute('radius',0.06);
+      star.setAttribute('color','#FFFACD'); // hellgelb
+      star.setAttribute('material','emissive:#FFFF99; emissiveIntensity:2; transparent:true; opacity:0.9; shader:standard;');
+      star.setAttribute('position',`${x} ${y} ${z}`);
+
+      // sanftes Funkeln
+      star.setAttribute('animation__flicker',{
+        property:'scale',
+        dir:'alternate',
+        dur:2000+Math.random()*1000,
+        loop:true,
+        easing:'easeInOutSine',
+        to:'1.2 1.2 1.2'
+      });
+
+      starContainer.appendChild(star);
+    }
+  </script>
+
+</body>
+</html>
